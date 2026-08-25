@@ -158,3 +158,4 @@ def pytest_sessionfinish(session, exitstatus):
             print(f"Allure report generated at {output_dir}")
         except Exception as e:
             print(f"Could not generate Allure report via CLI: {e}")
+
