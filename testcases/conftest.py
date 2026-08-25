@@ -8,7 +8,7 @@ import allure
 from pages.LoginPage import LoginPage
 from utilities import configReader, dataProvider
 
-
+#This is for launching single browser for all test cases to reduce the memory consumption
 @pytest.fixture(scope='session')
 def browser():
     with sync_playwright() as p:
