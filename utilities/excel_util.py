@@ -1,29 +1,29 @@
-import os
 
 import openpyxl
 
-def get_row_count(path,sheetName):
+
+def get_row_count(path, sheetName):
     workbook = openpyxl.load_workbook(path)
     sheet = workbook[sheetName]
     return sheet.max_row
 
 
-def get_col_count(path,sheetName):
+def get_col_count(path, sheetName):
     workbook = openpyxl.load_workbook(path)
     sheet = workbook[sheetName]
     return sheet.max_column
 
 
-def get_cell_data(path,sheetName,rowNum,colNum):
+def get_cell_data(path, sheetName, rowNum, colNum):
     workbook = openpyxl.load_workbook(path)
     sheet = workbook[sheetName]
-    return sheet.cell(row=rowNum,column=colNum).value
+    return sheet.cell(row=rowNum, column=colNum).value
 
 
-def set_cell_data(path,sheetName,rowNum,colNum,data):
+def set_cell_data(path, sheetName, rowNum, colNum, data):
     workbook = openpyxl.load_workbook(path)
     sheet = workbook[sheetName]
-    sheet.cell(row=rowNum,column=colNum).value=data
+    sheet.cell(row=rowNum, column=colNum).value = data
     workbook.save(path)
 
 

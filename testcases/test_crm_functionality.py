@@ -1,11 +1,6 @@
-import crm
-import pytest
-from playwright.sync_api import expect
 
 from pages.AllAppsPage import AllAppsPage
-from pages.CrmPage import CRMPage
 from testcases.Basetest import BaseTest
-from utilities import dataProvider
 
 
 class Test_crmtest(BaseTest):
@@ -19,7 +14,7 @@ class Test_crmtest(BaseTest):
         ap = AllAppsPage(authenticated_page)
         crm = ap.goto_crm()
 
-    def test_select_account(self,authenticated_page):
+    def test_select_account(self, authenticated_page):
         ap = AllAppsPage(authenticated_page)
         crm = ap.goto_crm()  # rebuild from scratch
         crm.click_create()

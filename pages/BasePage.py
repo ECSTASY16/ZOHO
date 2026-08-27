@@ -1,36 +1,43 @@
 import logging
+import re
 
 import allure
 from playwright.sync_api import expect
-import re
+
 from utilities import configReader
 from utilities.generate_log import Logger
 
-log=Logger(__name__,logging.DEBUG)
+log = Logger(__name__, logging.DEBUG)
+
 
 class BasePage:
+    def __init__(self, page):
+        self.page = page
 
-    def __init__(self,page):
-        self.page=page
-
-    def click(self,locator,timeout=1000):
+    def click(self, locator, timeout=1000):
         try:
-            self.page.locator(configReader.readConfig('locators',locator)).click(timeout=timeout*3)
+            self.page.locator(configReader.readConfig("locators", locator)).click(
+                timeout=timeout * 3
+            )
         except Exception as e:
             print(f"Config lookup failed for '{locator}': {e}")
-            self.page.locator(locator).click(timeout=timeout*3)
+            self.page.locator(locator).click(timeout=timeout * 3)
 
-    def type(self,locator,value):
-        with allure.step(f"Typing in an Element {locator} and entered value as {value}"):
+    def type(self, locator, value):
+        with allure.step(
+            f"Typing in an Element {locator} and entered value as {value}"
+        ):
             try:
-                self.page.locator(configReader.readConfig("locators",locator)).fill(value)
+                self.page.locator(configReader.readConfig("locators", locator)).fill(
+                    value
+                )
             except Exception:
                 self.page.locator(locator).fill(value)
         log.logger.info(f"Typing in an Element {locator} and entered value as {value}")
 
-    def move_to(self,locator):
+    def move_to(self, locator):
         with allure.step(f"Moving to an Element {locator}"):
-            self.page.locator(configReader.readConfig("locators",locator)).hover()
+            self.page.locator(configReader.readConfig("locators", locator)).hover()
         log.logger.info(f"Moving on a Element {locator}")
 
     def click_by_text(self, locator, exact=True, timeout=10):
@@ -43,18 +50,21 @@ class BasePage:
             self.page.get_by_text(text, exact=exact).click(timeout=timeout * 1000)
             log.logger.info(f"clicked on element with text: {text}")
 
-    def get_locator(self,locator,timeout=10000):
-        with allure.step(f'checking locator if interactable {locator}'):
-
+    def get_locator(self, locator, timeout=10000):
+        with allure.step(f"checking locator if interactable {locator}"):
             log.logger.info(f"checking locator if interactable {locator}")
-            return self.page.get_by_placeholder(configReader.readConfig("locators",locator))
+            return self.page.get_by_placeholder(
+                configReader.readConfig("locators", locator)
+            )
 
     def click_by_role(self, role, locator=None, exact=True, timeout=10):
         """Click an element by ARIA role and optional accessible name from conf.ini."""
         if locator:
             name = configReader.readConfig("locators", locator)
             with allure.step(f"Clicking element with role '{role}' and name '{name}'"):
-                self.page.get_by_role(role, name=name, exact=exact).click(timeout=timeout * 1000)
+                self.page.get_by_role(role, name=name, exact=exact).click(
+                    timeout=timeout * 1000
+                )
                 log.logger.info(f"Clicked element with role '{role}' and name '{name}'")
         else:
             with allure.step(f"Clicking element with role '{role}'"):
@@ -64,65 +74,97 @@ class BasePage:
     def type_by_placeholder(self, locator, value, exact=True):
         """Type into an input field by its placeholder text. Locator should contain the placeholder value in conf.ini"""
         placeholder = configReader.readConfig("locators", locator)
-        with allure.step(f"Typing in element with placeholder '{placeholder}' and entered value as {value}"):
+        with allure.step(
+            f"Typing in element with placeholder '{placeholder}' and entered value as {value}"
+        ):
             self.page.get_by_placeholder(placeholder, exact=exact).fill(value)
-            log.logger.info(f"Typed in element with placeholder '{placeholder}' and entered value as {value}")
+            log.logger.info(
+                f"Typed in element with placeholder '{placeholder}' and entered value as {value}"
+            )
 
     def click_by_placeholder(self, locator, exact=True, timeout=10):
         """Click element by its placeholder text. Locator should contain the placeholder value in conf.ini"""
         placeholder = configReader.readConfig("locators", locator)
         with allure.step(f"Clicking on element with placeholder: {placeholder}"):
-            self.page.get_by_placeholder(placeholder, exact=exact).click(timeout=timeout * 1000)
+            self.page.get_by_placeholder(placeholder, exact=exact).click(
+                timeout=timeout * 1000
+            )
             log.logger.info(f"Clicked on element with placeholder: {placeholder}")
 
     def verify_placeholder_visible(self, locator, exact=True, timeout=10000):
         """Verify element with placeholder is visible"""
         placeholder = configReader.readConfig("locators", locator)
-        with allure.step(f"Verifying element with placeholder '{placeholder}' is visible"):
-            expect(self.page.get_by_placeholder(placeholder, exact=exact)).to_be_visible(timeout=timeout)
-            log.logger.info(f"Verified element with placeholder '{placeholder}' is visible")
+        with allure.step(
+            f"Verifying element with placeholder '{placeholder}' is visible"
+        ):
+            expect(
+                self.page.get_by_placeholder(placeholder, exact=exact)
+            ).to_be_visible(timeout=timeout)
+            log.logger.info(
+                f"Verified element with placeholder '{placeholder}' is visible"
+            )
 
     def get_value_by_placeholder(self, locator, exact=True):
         """Get input value from element by its placeholder text"""
         placeholder = configReader.readConfig("locators", locator)
-        with allure.step(f"Getting value from element with placeholder '{placeholder}'"):
+        with allure.step(
+            f"Getting value from element with placeholder '{placeholder}'"
+        ):
             value = self.page.get_by_placeholder(placeholder, exact=exact).input_value()
-            log.logger.info(f"Got value from element with placeholder '{placeholder}': {value}")
+            log.logger.info(
+                f"Got value from element with placeholder '{placeholder}': {value}"
+            )
             return value
 
     def clear_by_placeholder(self, locator, exact=True):
         """Clear text from input field by its placeholder"""
         placeholder = configReader.readConfig("locators", locator)
-        with allure.step(f"Clearing text from element with placeholder '{placeholder}'"):
+        with allure.step(
+            f"Clearing text from element with placeholder '{placeholder}'"
+        ):
             self.page.get_by_placeholder(placeholder, exact=exact).clear()
-            log.logger.info(f"Cleared text from element with placeholder '{placeholder}'")
+            log.logger.info(
+                f"Cleared text from element with placeholder '{placeholder}'"
+            )
 
-    def verify_text(self,locator,expected_key_text,timeout):
-            locator_value = configReader.readConfig("locators", locator)
-            expected_text = configReader.readConfig("locators", expected_key_text)
-            with allure.step(f"Verifying element text {locator_value}"):
-                expect(self.page.locator(locator_value)).to_have_text(expected_text, timeout=timeout * 1000)
-                log.logger.info(f"Verifying element {locator_value}: has text: {expected_text}")
+    def verify_text(self, locator, expected_key_text, timeout):
+        locator_value = configReader.readConfig("locators", locator)
+        expected_text = configReader.readConfig("locators", expected_key_text)
+        with allure.step(f"Verifying element text {locator_value}"):
+            expect(self.page.locator(locator_value)).to_have_text(
+                expected_text, timeout=timeout * 1000
+            )
+            log.logger.info(
+                f"Verifying element {locator_value}: has text: {expected_text}"
+            )
 
     def get_text(self, locator):
         """Get text content from an element"""
         with allure.step(f"Getting text from element {locator}"):
-            text = self.page.locator(configReader.readConfig("locators", locator)).inner_text()
+            text = self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).inner_text()
             log.logger.info(f"Got text from element {locator}: {text}")
             return text
 
     def get_attribute(self, locator, attribute):
         """Get attribute value from an element"""
         with allure.step(f"Getting attribute '{attribute}' from element {locator}"):
-            value = self.page.locator(configReader.readConfig("locators", locator)).get_attribute(attribute)
-            log.logger.info(f"Got attribute '{attribute}' from element {locator}: {value}")
+            value = self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).get_attribute(attribute)
+            log.logger.info(
+                f"Got attribute '{attribute}' from element {locator}: {value}"
+            )
             return value
 
     def is_visible(self, locator, timeout=5000):
         """Check if element is visible"""
         try:
             with allure.step(f"Checking visibility of element {locator}"):
-                visible = self.page.locator(configReader.readConfig("locators", locator)).is_visible(timeout=timeout)
+                visible = self.page.locator(
+                    configReader.readConfig("locators", locator)
+                ).is_visible(timeout=timeout)
                 log.logger.info(f"Element {locator} visibility: {visible}")
                 return visible
         except Exception as e:
@@ -132,38 +174,49 @@ class BasePage:
     def is_enabled(self, locator):
         """Check if element is enabled"""
         with allure.step(f"Checking if element {locator} is enabled"):
-            enabled = self.page.locator(configReader.readConfig("locators", locator)).is_enabled()
+            enabled = self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).is_enabled()
             log.logger.info(f"Element {locator} enabled: {enabled}")
             return enabled
 
     def is_checked(self, locator):
         """Check if checkbox/radio is checked"""
         with allure.step(f"Checking if element {locator} is checked"):
-            checked = self.page.locator(configReader.readConfig("locators", locator)).is_checked()
+            checked = self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).is_checked()
             log.logger.info(f"Element {locator} checked: {checked}")
             return checked
 
     def wait_for_element(self, locator, state="visible", timeout=30000):
         """Wait for element to be in specified state (visible, hidden, attached, detached)"""
         with allure.step(f"Waiting for element {locator} to be {state}"):
-            self.page.locator(configReader.readConfig("locators", locator)).wait_for(state=state, timeout=timeout)
+            self.page.locator(configReader.readConfig("locators", locator)).wait_for(
+                state=state, timeout=timeout
+            )
             log.logger.info(f"Element {locator} is now {state}")
 
     def select_dropdown_by_value(self, locator, value):
         """Select dropdown option by value"""
         with allure.step(f"Selecting dropdown {locator} with value {value}"):
-            self.page.locator(configReader.readConfig("locators", locator)).select_option(value=value)
+            self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).select_option(value=value)
             log.logger.info(f"Selected dropdown {locator} with value: {value}")
 
     def select_dropdown_by_label(self, locator, label):
         """Select dropdown option by visible label"""
         with allure.step(f"Selecting dropdown {locator} with label {label}"):
-            self.page.locator(configReader.readConfig("locators", locator)).select_option(label=label)
+            self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).select_option(label=label)
             log.logger.info(f"Selected dropdown {locator} with label: {label}")
 
     def select_custom_dropdown(self, locator, label):
         """Select option from a custom saf-select web component (not a native <select>).
-        Clicks the combobox to open it, then clicks the matching option in the listbox."""
+        Clicks the combobox to open it, then clicks the matching option in the listbox.
+        """
         with allure.step(f"Selecting custom dropdown {locator} with label {label}"):
             self.page.locator(configReader.readConfig("locators", locator)).click()
             self.page.get_by_role("option", name=label, exact=True).click()
@@ -190,7 +243,9 @@ class BasePage:
     def right_click(self, locator):
         """Right click (context click) on an element"""
         with allure.step(f"Right clicking on element {locator}"):
-            self.page.locator(configReader.readConfig("locators", locator)).click(button="right")
+            self.page.locator(configReader.readConfig("locators", locator)).click(
+                button="right"
+            )
             log.logger.info(f"Right clicked on element {locator}")
 
     def clear_text(self, locator):
@@ -199,9 +254,11 @@ class BasePage:
             self.page.locator(configReader.readConfig("locators", locator)).clear()
             log.logger.info(f"Cleared text from element {locator}")
 
-    def field_is_editable(self,locator,timeout=30000):
+    def field_is_editable(self, locator, timeout=30000):
         with allure.step(f"Checking if  {locator} is editable"):
-            editable=self.page.locator(configReader.readConfig("locators",locator)).is_editable(timeout=timeout)
+            editable = self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).is_editable(timeout=timeout)
             log.logger.info(f"Checking if  {locator} is editable: {editable}")
             return editable
 
@@ -214,7 +271,9 @@ class BasePage:
     def upload_file(self, locator, file_path):
         """Upload file to input element"""
         with allure.step(f"Uploading file {file_path} to element {locator}"):
-            self.page.locator(configReader.readConfig("locators", locator)).set_input_files(file_path)
+            self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).set_input_files(file_path)
             log.logger.info(f"Uploaded file {file_path} to element {locator}")
 
     def get_page_title(self):
@@ -258,32 +317,41 @@ class BasePage:
     def scroll_to_element(self, locator):
         """Scroll to an element"""
         with allure.step(f"Scrolling to element {locator}"):
-            self.page.locator(configReader.readConfig("locators", locator)).scroll_into_view_if_needed()
+            self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).scroll_into_view_if_needed()
             log.logger.info(f"Scrolled to element {locator}")
 
     def get_element_count(self, locator):
         """Get count of elements matching locator"""
         with allure.step(f"Getting count of elements {locator}"):
-            count = self.page.locator(configReader.readConfig("locators", locator)).count()
+            count = self.page.locator(
+                configReader.readConfig("locators", locator)
+            ).count()
             log.logger.info(f"Element {locator} count: {count}")
             return count
 
     def verify_element_visible(self, locator, timeout=30000):
         """Verify element is visible"""
         with allure.step(f"Verifying element {locator} is visible"):
-            expect(self.page.locator(configReader.readConfig("locators", locator))).to_be_visible(timeout=timeout)
+            expect(
+                self.page.locator(configReader.readConfig("locators", locator))
+            ).to_be_visible(timeout=timeout)
             log.logger.info(f"Verified element {locator} is visible")
 
     def verify_element_hidden(self, locator, timeout=10000):
         """Verify element is hidden"""
         with allure.step(f"Verifying element {locator} is hidden"):
-            expect(self.page.locator(configReader.readConfig("locators", locator))).to_be_hidden(timeout=timeout)
+            expect(
+                self.page.locator(configReader.readConfig("locators", locator))
+            ).to_be_hidden(timeout=timeout)
             log.logger.info(f"Verified element {locator} is hidden")
-
 
     def verify_url_contains(self, expected_url_part):
         with allure.step(f"Verifying URL contains '{expected_url_part}'"):
-            expect(self.page).to_have_url(re.compile(f".*{re.escape(expected_url_part)}.*"))
+            expect(self.page).to_have_url(
+                re.compile(f".*{re.escape(expected_url_part)}.*")
+            )
             log.logger.info(f"Verified URL contains: {expected_url_part}")
 
     def verify_title_contains(self, expected_title):
@@ -309,13 +377,17 @@ class BasePage:
     def click_with_force(self, locator):
         """Click element with force (bypasses actionability checks)"""
         with allure.step(f"Force clicking on element {locator}"):
-            self.page.locator(configReader.readConfig("locators", locator)).click(force=True)
+            self.page.locator(configReader.readConfig("locators", locator)).click(
+                force=True
+            )
             log.logger.info(f"Force clicked on element {locator}")
 
     def type_slowly(self, locator, value, delay=100):
         """Type text slowly with delay between keystrokes"""
         with allure.step(f"Typing slowly in element {locator} with value {value}"):
-            self.page.locator(configReader.readConfig("locators", locator)).type(value, delay=delay)
+            self.page.locator(configReader.readConfig("locators", locator)).type(
+                value, delay=delay
+            )
             log.logger.info(f"Typed slowly in element {locator}: {value}")
 
     def wait_for_load_state(self, state="load", timeout=30000):
@@ -383,7 +455,9 @@ class BasePage:
         If switch_to_new_tab() was skipped (no new tab opened), does nothing."""
         with allure.step("Closing new tab and switching back to original page"):
             if not hasattr(self, "original_page") or self.original_page is None:
-                log.logger.warning("No original page to switch back to — skipping close")
+                log.logger.warning(
+                    "No original page to switch back to — skipping close"
+                )
                 return self
             self.page.close()
             self.page = self.original_page
@@ -391,11 +465,7 @@ class BasePage:
             log.logger.info("Closed new tab and switched back to original page")
             return self
 
-
     def logout(self):
         self.click("logout_CSS")
         log.logger.info("Logged Out")
         return self
-
-
-

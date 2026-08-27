@@ -3,16 +3,17 @@ from pages.BasePage import BasePage
 
 class CRMPage(BasePage):
     def __init__(self, page):
-        super(). __init__(page)
+        super().__init__(page)
 
     def click_create(self):
-        self.click('create_btn')
+        self.click("create_btn")
         return self
 
     def select_account_option(self):
-        self.wait_for_load_state('networkidle')
-        self.click_by_text('Account_optn')
+        self.wait_for_load_state("networkidle")
+        self.click_by_text("Account_optn")
         return self
+
     #
     # def enter_account_name(self, acnt_name):
     #     self.type('Account_name_input_field', acnt_name)

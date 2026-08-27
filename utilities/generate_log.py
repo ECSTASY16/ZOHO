@@ -2,24 +2,27 @@ import logging
 import os
 import time
 
-
 # logging.basicConfig(filename="..\\Logs\\logfile.log",format='%(asctime)s:  %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p'
 #                     ,level=logging.INFO)
 #
 # log=logging.getLogger()
 # log.info("D")
 
-#creating function so that the log logic can be used where ever required
-class Logger():
 
+# creating function so that the log logic can be used where ever required
+class Logger:
     def __init__(self, logger, file_level=logging.INFO):
         self.logger = logging.getLogger(logger)
         self.logger.setLevel(logging.INFO)
 
-        fmt = logging.Formatter('%(asctime)s - %(filename)s:[%(lineno)s] - [%(levelname)s] - %(message)s')
+        fmt = logging.Formatter(
+            "%(asctime)s - %(filename)s:[%(lineno)s] - [%(levelname)s] - %(message)s"
+        )
 
         curr_time = time.strftime("%Y-%m-%d")
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Directory where configReader.py is located
+        BASE_DIR = os.path.dirname(
+            os.path.abspath(__file__)
+        )  # Directory where configReader.py is located
         LOG_DIR = os.path.join(BASE_DIR, "..", "logs")
         os.makedirs(LOG_DIR, exist_ok=True)
         self.LogFileName = os.path.join(LOG_DIR, f"log{curr_time}.txt")
